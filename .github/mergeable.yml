@@ -11,6 +11,7 @@ mergeable:
           regex: 'wip'
 
 ---
+version: 2
 mergeable:
   - when: pull_request.*
     validate:
