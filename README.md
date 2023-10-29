@@ -1,4 +1,4 @@
 # wip syntax added
 
-first commit with wip syntax
+first commit with wip syntaxes
 
