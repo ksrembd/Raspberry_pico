@@ -11,4 +11,4 @@ https://ece4760.github.io/#Links-(these-are-our-%22textbook%22)
 
 https://micropython.org/download/RPI_PICO_W/
 https://micropython.org/download/RPI_PICO/
-yes
+yes, 
