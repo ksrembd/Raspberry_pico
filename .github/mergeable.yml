@@ -1,23 +1,27 @@
 version: 2
 mergeable:
-  - when: pull_request.*
+  - when: pull_request.*, pull_request_review.*
+    name: 'Approval check'
     validate:
-      - do: title
-        must_exclude:
-          regex: ^\[WIP\]
-      - do: label
-        must_exclude:
-          regex: 'wip' 
-      - do: description
-        no_empty:
-          enabled: true
-          message: Description matter and should not be empty. Provide detail with **what** was changed, **why** it was changed, and **how** it was changed.
-      - do: comment
-        payload:
-          body: >
-            [ ] checklist 1
-            [ ] checklist 2
-            [ ] checklist 3
-        leave_old_comment: true # leaves the old data    
+      - do: approvals
+        min:
+          count: 1
+        limit:
+          users: [ 'approverA', 'approverB' ]
 
-     
+  - when: pull_request.*, pull_request_review.*
+    name: 'PR title check'
+    validate:
+      - do: or
+        validate:
+          - do: changeset
+            must_exclude:
+              regex: './ipnext/qnx/*'
+          - do: and
+            validate:
+              - do: changeset
+                must_include:
+                  regex: './ipnext/aas/*'
+              - do: title
+                begins_with:
+                  match: [ 'some prefix' ]
