@@ -1,7 +1,4 @@
-# This is fusi test implementation checklist
+# Please go the the `Preview` tab and select the appropriate sub-template based on the changes
 
-- [ ] Is the metadata filled correctely
-- [ ] Req Tracibility is done
-- [ ] Test case coverage ensured
-- [ ] Positive and Negative use cases covered
-- [ ] FIU use case covered
+* [platform_test_development](?expand=1&template=platform_test_development.md)
+* [platform_test_documentation](?expand=1&template=platform_test_documentation.md)
