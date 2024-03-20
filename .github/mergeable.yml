@@ -1,15 +1,6 @@
 version: 2
 mergeable:
   - when: pull_request.*, pull_request_review.*
-    name: 'Approval check'
-    validate:
-      - do: approvals
-        min:
-          count: 1
-        limit:
-          users: [ 'approverA', 'approverB' ]
-
-  - when: pull_request.*, pull_request_review.*
     name: 'PR title check'
     validate:
       - do: or
