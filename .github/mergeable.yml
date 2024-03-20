@@ -59,7 +59,7 @@
         message: When NA / NOK is selected,this has to be changed or edited to either NA or NOK only with description
 
 .pr-checklist-validator-label: &pr-checklist-validator-label
-  do: label
+    do: label
   and:
     - must_exclude:
         regex: 'wip'
@@ -74,8 +74,11 @@
   when: pull_request.*
   name: "PR: checklist validation"
   validate:
-    - *pr-checklist-validator-description
-    - *pr-checklist-validator-label  
+    - do: changeset
+        must_include:
+            regex: './ipnext/aas/*'
+        - *pr-checklist-validator-description
+        - *pr-checklist-validator-label  
 
 .mergeable-test-pr-description-validation-check: &mergeable-test-pr-description-validation-check
   <<: *pr-checklist-validation-check
