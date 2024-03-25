@@ -7,12 +7,12 @@ mergeable:
         validate:
           - do: changeset
             must_exclude:
-              regex: 'some/regex/for/those/certain/files/*'
+              regex: 'ipnext/aas/*'
           - do: and
             validate:
               - do: changeset
                 must_include:
-                  regex: 'some/regex/for/those/certain/files/*'
+                  regex: 'ipnext/arch/*'
               - do: title
                 begins_with:
-                  match: [ 'some prefix' ]
+                  match: [ 'test_' ]
