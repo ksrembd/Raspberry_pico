@@ -77,7 +77,6 @@ validate:
       - do: changeset
         must_exclude:
           regex: 'ipnext/aas/*'
-          message: checklist bot not enabled
       - do: and
         validate:
           - do: changeset
@@ -86,7 +85,6 @@ validate:
           - do: title
             begins_with:
               match: ['test_']
-              message: checklist bot enabled
 
 
 .pr-checklist-validation-check: &pr-checklist-validation-check
