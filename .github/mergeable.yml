@@ -76,7 +76,7 @@
       must_include:
         regex: 'ipnext/arch/*'
     - do: title
-        begins_with:
+      begins_with:
         match: ['test_']
 
 
