@@ -71,9 +71,9 @@
         message: Remove "do not merge" label from the PR to merge
 
 .pr-checklist-path: &pr-checklist-path
-  validate:
-    - do: changeset
-      must_include:
+  do: repository
+  name:
+    must_include:
         regex: 'ipnext/arch/*'
 
 
