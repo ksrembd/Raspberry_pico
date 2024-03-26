@@ -75,9 +75,6 @@
     - do: changeset
       must_include:
         regex: 'ipnext/arch/*'
-    - do: title
-      begins_with:
-        match: ['test_']
 
 
 .pr-checklist-validation-check: &pr-checklist-validation-check
@@ -91,6 +88,8 @@
 .mergeable-test-pr-description-validation-check: &mergeable-test-pr-description-validation-check
 validate:
   <<: *pr-checklist-validation-check
+  filter:
+    - *pr-checklist-path
 
 
 ################################################################################
@@ -106,9 +105,4 @@ validate:
 ################################################################################
 version: 2
 mergeable:
-  - when: pull_request.*
-    name: 'checklist path filter'
-    validate:
-      - *pr-checklist-path
-    pass:
-      - *mergeable-test-pr-description-validation-check
+  - *mergeable-test-pr-description-validation-check
