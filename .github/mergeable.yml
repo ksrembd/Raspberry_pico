@@ -1,15 +1,41 @@
 
+.pr-checklist-validator-label: &pr-checklist-validator-label
+    do: label
+    and:
+    - must_exclude:
+        regex: 'wip'
+        regex_flag: m
+        message: Remove "wip" label from the PR to merge
+    - must_exclude:
+        regex: 'do not merge'
+        regex_flag: m
+        message: Remove "do not merge" label from the PR to merge
 
 .pr-checklist-path: &pr-checklist-path
- when: pull_request.*
- name: ' Test case path check'
- validate:
-    - do: changeset
-      must_include:
-        regex:'ipnext/arch/*'
+  - when: pull_request.*
+    name: 'PR test case path check'
+    validate:
+      - do: or
+        validate:
+          - do: changeset
+            must_exclude:
+              regex:'ipnext/aas/*'
+          - do: and
+            validate:
+              - do: changeset
+                must_include:
+                  regex:'ipnext/arch/*'
+              - do: changeset
+                must_include:
+                  regex:'ipnext/qnx/*'
 
+.pr-checklist-validation-check: &pr-checklist-validation-check
+  when: pull_request.*
+  name: "PR: checklist validation"
+  validate:
+        - *pr-checklist-validator-label  
 
 version: 2
 mergeable:
-    - *pr-checklist-path
+    - *pr-checklist-validation-check
     
