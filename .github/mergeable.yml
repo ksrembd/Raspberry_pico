@@ -74,10 +74,7 @@
 validate:
   - do: or
     validate:
-      - do: changeset
-        must_exclude:
-          regex: 'ipnext/aas/*'
-      - do: and
+      - do: 
         validate:
           - do: changeset
             must_include:
@@ -93,7 +90,7 @@ validate:
   validate:
         - *pr-checklist-validator-description
         - *pr-checklist-validator-label  
-        - *pr-checklist-path
+
 
 .mergeable-test-pr-description-validation-check: &mergeable-test-pr-description-validation-check
 validate:
@@ -103,6 +100,20 @@ validate:
 ################################################################################
 # Mergeable configuration
 ################################################################################
+#version: 2
+#mergeable:
+#  - *mergeable-test-pr-description-validation-check
+
+
+################################################################################
+# Mergeable configuration
+################################################################################
 version: 2
 mergeable:
-  - *mergeable-test-pr-description-validation-check
+  - when: pull_request.*
+    name: 'checklist path filter'
+    validate:
+      - *pr-checklist-path
+    pass:
+      - *mergeable-test-pr-description-validation-check
+    
