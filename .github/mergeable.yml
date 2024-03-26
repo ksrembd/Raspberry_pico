@@ -1,62 +1,3 @@
-.pr-checklist-validator-description: &pr-checklist-validator-description
-  do: description
-  and:
-    #Checking if the description is empty
-    - no_empty:
-        enabled: true
-        message: Description matter and should not be empty.
-    #Checking when both OK and NOK / NA checkboxes are selected
-    - must_exclude:
-        regex: '^\s+\-\s\[x\]\sOK\s*\:\s+\-\s\[x\]\sNOK\s*\/\s*NA\s*\:\s*[a-z A-Z \d \: \, \. \- \[\]]+$'
-        regex_flag: m
-        message: Selecting both "OK and NOK / OK" checkboxes are invalid, Select any one of the checkboxes in a particular checklist
-    #Checking when both OK and NOK checkboxes are selected
-    - must_exclude:
-        regex: '^\s+\-\s\[x\]\sOK\s*\:\s+\-\s\[x\]\s*NOK\s*\:\s*[a-z A-Z \d \: \, \. \- \[\]]+$'
-        regex_flag: m
-        message: Selecting both checkboxes for "OK and NOK" is invalid , Select any one of the checkboxes in a particular checklist
-    #Checking when both OK and NA checkboxes are selected
-    - must_exclude:
-        regex: '^\s+\-\s\[x\]\sOK\s*\:\s+\-\s\[x\]\s*NA\s*\:\s*[a-z A-Z \d \: \, \. \- \[\]]+$'
-        regex_flag: m
-        message: Selecting both checkboxes for "OK and NA" is invalid , Select any one of the checkboxes in a particular checklist
-    #Checking when NOK \ NA is selected
-    - must_exclude:
-        regex: '^\s+\-\s\[ \]\sOK\s*\:\s+\-\s\[x\]\s*NOK\s*\/\s*NA\s*\:\s\[enter text here\]'
-        regex_flag: m
-        message: When "NOK \ NA" is selected, make sure either NOK or NA is kept by editing with a description
-    #Checking when both OK and NOK / NA  checkboxes are empty
-    - must_exclude:
-        regex: '^\s+\-\s\[ \]\sOK\s*\:\s+\-\s\[ \]\s*NOK\s*\/\s*NA\s*\:\s*[a-z A-Z \d \: \, \. \- \[\]]+$'
-        regex_flag: m
-        message: Both "OK and NOK / OK" checkboxes should not be empty, Select any one of the checkboxes
-    #Checking When both OK and NOK checkboxes are empty
-    - must_exclude:
-        regex: '^\s+\-\s\[ \]\sOK\s*\:\s+\-\s\[ \]\s*NOK\s*\:\s*[a-z A-Z \d \: \, \. \- \[\]]+$'
-        regex_flag: m
-        message: Both "OK and NOK" checkboxes should not be empty, Select any one of the checkboxes
-    #Checking When both OK and NA checkboxes are empty
-    - must_exclude:
-        regex: '^\s+\-\s\[ \]\sOK\s*\:\s+\-\s\[ \]\s*NA\s*\:\s*[a-z A-Z \d \: \, \. \- \[\]]+$'
-        regex_flag: m
-        message: Both "OK and NA" checkboxes should not be empty, Select any one of the checkboxes
-        
-  or:
-    #This is for OK only
-    - must_include:
-        regex: '^\s+\-\s\[x\]\sOK\s*\:\s+\-\s\[\s\]\sNOK\s\/\sNA\s\:\s\[enter text here\]'
-        regex_flag: m
-        message: When OK is selected, changes or editing is not allowed
-    #This is for NOK with description
-    - must_include:
-        regex: '^\s+\-\s\[ \]\sOK\s*\:\s+\-\s\[x\]\s*NOK\s*\:\s*[a-z A-Z \d \: \, \. \- \[\]]+$'
-        regex_flag: m
-        message: When NA / NOK is selected,this has to be changed or edited to either NOK or NA only with description
-    #This is for NA with description
-    - must_include:
-        regex: '^\s+\-\s\[ \]\sOK\s*\:\s+\-\s\[x\]\s*NA\s*\:\s*[a-z A-Z \d \: \, \. \- \[\]]+$'
-        regex_flag: m
-        message: When NA / NOK is selected,this has to be changed or edited to either NA or NOK only with description
 
 .pr-checklist-validator-label: &pr-checklist-validator-label
     do: label
@@ -71,37 +12,30 @@
         message: Remove "do not merge" label from the PR to merge
 
 .pr-checklist-path: &pr-checklist-path
-  do: repository
-  name:
-    must_include:
-        regex: 'ipnext/arch/*'
-
+  - when: pull_request.*
+    name: 'PR test case path check'
+    validate:
+      - do: or
+        validate:
+          - do: changeset
+            must_exclude:
+              regex:'ipnext/aas/*'
+          - do: and
+            validate:
+              - do: changeset
+                must_include:
+                  regex:'ipnext/arch/*'
+              - do: changeset
+                must_include:
+                  regex:'ipnext/qnx/*'
 
 .pr-checklist-validation-check: &pr-checklist-validation-check
   when: pull_request.*
   name: "PR: checklist validation"
   validate:
-        - *pr-checklist-validator-description
         - *pr-checklist-validator-label  
 
-
-.mergeable-test-pr-description-validation-check: &mergeable-test-pr-description-validation-check
-  <<: *pr-checklist-validation-check
-  filter:
-    - *pr-checklist-path
-
-
-################################################################################
-# Mergeable configuration
-################################################################################
-#version: 2
-#mergeable:
-#  - *mergeable-test-pr-description-validation-check
-
-
-################################################################################
-# Mergeable configuration
-################################################################################
 version: 2
 mergeable:
-  - *mergeable-test-pr-description-validation-check
+    - *pr-checklist-validation-check
+    

@@ -1,0 +1,850 @@
+Skip to content
+ Enterprise
+Search or jump to…
+Pull requests
+Issues
+Explore
+ 
+@sriramkavuluripartner 
+Heads-up Compliance: Every user has to ensure that tools/components used in builds or stored in images are properly licensed (e.g. tools, Java Runtime) – Details
+
+node0
+/
+mergeable-test
+Public
+Fork your own copy of node0/mergeable-test
+Code
+Pull requests
+10
+Projects
+Security
+Insights
+mergeable-test/.github/mergeable.yml
+@dogancanyigitpartner
+dogancanyigitpartner TEST: optional checks functionality
+…
+Latest commit f8c8c3b 2 weeks ago
+ History
+ 4 contributors
+@jeremieguichardpartner@tomaszdziendzielskipartner@marcinlispartner@dogancanyigitpartner
+825 lines (742 sloc)  28.3 KB
+ 
+
+# This file configures GitHub Mergeable App
+#
+# Repo in CC: https://cc-github.bmwgroup.net/codecraft-oss/probot-mergeable
+# Documentation: https://mergeable.readthedocs.io/en/latest/index.html
+#
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# This file was generated using
+# https://cc-github.bmwgroup.net/node0/mergeable-conf-generator
+#
+# Do not edit!
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#
+# yamllint disable rule:line-length
+
+# Generic _shared definitions
+################################################################################
+
+# Regular expression pattern used for detecting WIP (Work in Progress)
+# IMPORTANT: mergeable regex is case-insensitive by default
+.wip-regex: &wip-regex
+  regex: "\\bwip\\b|\\bwork.?in.?progress\\b|\\bdo.?not.?merge\\b|\\bdon'?t.?merge\\b|\\bdo.?not.?review\\b|\\bdon'?t.?review\\b|\\bdraft\\b"
+
+# Generic actions definitions
+################################################################################
+
+# Check action used to overwrites mergeable default messages in case of errors
+# additionally certain rules customize the pass action so other
+# actions should be customized too so there is always feedback to GitHub.
+.check-error-action: &check-error-action
+  do: checks
+  status: "action_required"
+  payload:
+    title: "Mergeable configuration errors!"
+    summary: |
+      ### Status: {{toUpperCase validationStatus}}
+            Some or All of the validators have returned 'error' status,
+            please check below for details
+            Here are some stats of the run: \n
+            {{validationCount}} validations were ran.
+            {{passCount}} PASSED
+            {{failCount}} FAILED
+            {{errorCount}} ERRORED
+    text: "{{#each validationSuites}}
+      #### {{{statusIcon status}}} Validator: {{toUpperCase name}}
+      Status {{toUpperCase status}}
+      {{#each validations }} * {{{statusIcon status}}}\
+      {{{ description }}}\n
+      {{#if details.error}}
+      Error : {{{details.error}}}
+      {{/if}}
+      {{/each}}
+      {{/each}}"
+
+# Check action used to overwrites mergeable default messages in case of failure
+# (validations did not passed e.g. approval not given)
+# additionally certain rules customize the pass action so other
+# actions should be customized too so there is always feedback to GitHub.
+.check-failure-action: &check-failure-action
+  do: checks
+  status: "failure"
+  payload:
+    title: "Approval needed"
+    summary: |
+      ### Status: {{toUpperCase validationStatus}}
+            Here are some stats of the run:
+            {{validationCount}} validations were ran.
+            {{passCount}} PASSED
+            {{failCount}} FAILED
+    text: "{{#each validationSuites}}\n
+      #### {{{statusIcon status}}} Validator: {{toUpperCase name}}\n
+      {{#each validations }} * {{{statusIcon status}}}\
+      {{{ description }}}\n
+      {{/each}}\n
+      {{/each}}"
+
+# Check action used to overwrites mergeable default messages in case of success
+# (validations passed e.g. approval given or not needed)
+# additionally certain rules customize the pass action so other
+# actions should be customized too so there is always feedback to GitHub.
+.check-success-action: &check-success-action
+  do: checks
+  status: "success"
+  payload:
+    title: "Approval given or not needed"
+    summary: |
+      ### Status: {{toUpperCase validationStatus}}
+            Here are some stats of the run:
+            {{validationCount}} validations were ran.
+            {{passCount}} PASSED
+            {{failCount}} FAILED
+    text: "{{#each validationSuites}}\n
+      #### {{{statusIcon status}}} Validator: {{toUpperCase name}}\n
+      {{#each validations }} * {{{statusIcon status}}}\
+      {{{ description }}}\n
+      {{/each}}\n
+      {{/each}}"
+
+# Generic checks definitions
+################################################################################
+
+# yocto layer folders
+.changetype-yocto-test-layers-regex: &changetype-yocto-test-layers-regex >-
+  (recipes-.*/.*|conf/.*|classes/.*)$
+
+# Commit: title validation rule
+#
+# Check if commit title contains Revert, Merge or Bumped Submodules
+# To be used with OR conditional to skip validation.
+#
+# Needed when:
+# * This is a non voting rule
+#
+.commit-excluder: &commit-excluder
+  do: commit
+  message:
+    regex: '^(Revert|Merge|Bumped Submodules).*\n\n'
+    regex_flag: si
+    message: >-
+      Commit title does not contain `Revert`, `Merge`, or
+      `Bumped Submodules:`, will validate other criteria.
+# Commit: title validation rule
+#
+# Check if commit title follows the "<component>: <short description>" syntax
+# This rule won't be enforced if the commit is Revert, Merge, or Bumped Submodules.
+# It is used with an OR conditional.
+#
+# Needed when:
+# * always
+#
+.commit-component-description-validator: &commit-component-description-validator
+  do: commit
+  message:
+    regex: '^\S+: .+\n\n'
+    regex_flag: si
+    message: >-
+      Commit title field is incorrect.
+      Check
+      [documentation](https://cc-github.bmwgroup.net/pages/node0/node0-linux-documentation/master/contributing-information/pr-commit-conventions.html)
+      for details.
+# Commit: Issue field validation rule
+#
+# Check if commit message contains Issue: field with correct values
+#
+# Needed when:
+# * always
+#
+.commit-issue-validator: &commit-issue-validator
+  do: commit
+  message:
+    # search for Issue field
+    regex: ^[Ii][Ss][Ss][Uu][Ee]:[ ]?([Nn][Oo][Nn][Ee]|(([A-Z0-9]+-[0-9]+)(,|, | ,|))+(?<!,[ ]?))$
+    regex_flag: m
+    message: >-
+      Issue field on commit message is incorrect.
+      Check
+      [documentation](https://cc-github.bmwgroup.net/pages/node0/node0-linux-documentation/master/contributing-information/pr-commit-conventions.html)
+      for details.
+# Commit: do not allow PR-specific fields
+#
+# Check if commit message contains PR-specific fields
+#
+# Needed when:
+# * always
+#
+.commit-pr-fields-validator: &commit-pr-fields-validator
+  do: commit
+  message:
+    # yamllint disable rule:line-length
+    regex: '^(?!.*(Bitbake-Extra-Arguments|Bitbake-Target|Depends-On|Domain-Tests|Release-PDX|Tested-With|Upload-Artifacts|With-OSS-Artifacts):).*'
+    regex_flag: si
+    message: >-
+      Commit body must not contain PR specific fields.
+      Check
+      [documentation](https://cc-github.bmwgroup.net/pages/node0/node0-linux-documentation/master/contributing-information/pr-commit-conventions.html)
+      for details.
+# This validation must not be used with WIP, not-a-draft filters,
+# as each push must go through validation.
+.commit-message-validation-check: &commit-message-validation-check
+  when: pull_request.opened, pull_request.reopened, pull_request.synchronize, pull_request.edited, pull_request.labeled
+  name: "PR: commit message validation"
+  validate:
+    - *commit-issue-validator
+    - *commit-pr-fields-validator
+    - do: or
+      validate:
+        - *commit-excluder
+        - do: changeset
+          must_exclude:
+            regex: *changetype-yocto-test-layers-regex
+        - do: and
+          validate:
+            - do: changeset
+              must_include:
+                regex: *changetype-yocto-test-layers-regex
+            - *commit-component-description-validator
+  pass:
+    - *check-success-action
+  fail:
+    - *check-failure-action
+  error:
+    - *check-error-action
+
+.pr-checklist-validator: &pr-checklist-validator
+  do: description
+  must_exclude:
+    regex: '\[ \]'
+    regex_flag: m
+    message: Missing checking checklist in PR's description
+
+.pr-checklist-validation-check: &pr-checklist-validation-check
+  when: pull_request.edited, pull_request.opened, pull_request.ready_for_review, pull_request.reopened, pull_request.synchronize, pull_request.unlabeled, pull_request_review.edited, pull_request_review.submitted
+  name: "PR: checklist validation"
+  validate:
+    # we can validate PR's description with multiple validators:
+    - *pr-checklist-validator
+  pass:
+    - *check-success-action
+  fail:
+    - *check-failure-action
+  error:
+    - *check-error-action
+
+# PR: description validation rule
+#
+# Check for the required Issue: field in the PR description
+#
+# Needed when:
+# * always
+#
+.pr-description-field-validator-issue: &pr-description-field-validator-issue
+  do: description
+  must_include:
+    # "regex" should be aligned with the following one(s):
+    # yamllint disable-line rule:line-length
+    # - https://cc-github.bmwgroup.net/node0/release-notes-generator/blob/master/release_notes_generator/git.py
+    # yamllint disable-line rule:line-length
+    # - https://cc-github.bmwgroup.net/node0/build-support-yocto/blob/master/lib/build_support_yocto/github_utils.py
+    # Search for ISSUES_LINE_REGEX
+    regex: ^[Ii][Ss][Ss][Uu][Ee]:[ ]?([Nn][Oo][Nn][Ee]|(([A-Z0-9]+-[0-9]+)(,|, | ,|))+(?<!,[ ]?))$
+    regex_flag: m
+    message: >-
+      'Issue' field in PR's description missing or malformed.
+      Check
+      [documentation](https://cc-github.bmwgroup.net/pages/node0/node0-linux-documentation/master/contributing-information/pr-fields.html#issue)
+      for details.
+# PR: description validation rule
+#
+# Check if any of forbidden fields is present in the PR description
+# to prevent PRs from gating and give early information
+# Forbidden fields list:
+#   - Bitbake-Target:
+#   - Bitbake-Extra-Arguments:
+#   - Skip:
+#
+# IMPORTANT: the regular expressions to match the fields above
+# MUST adhere to the specification of the fields as implemented
+# in Python, in the build-support-yocto repository.
+#
+# Needed when:
+# * always
+#
+.pr-description-field-validator-bitbake: &pr-description-field-validator-bitbake
+  do: description
+  and:
+    - must_exclude:
+        regex: '^Bitbake-Target:\s.*'
+        regex_flag: mi
+        message: Forbidden 'Bitbake-Target' field in PR's description
+    - must_exclude:
+        regex: '^Bitbake-Extra-Arguments:\s.*'
+        regex_flag: mi
+        message: Forbidden 'Bitbake-Extra-Arguments' field in PR's description
+
+.pr-description-field-validator-skip: &pr-description-field-validator-skip
+  do: description
+  and:
+    - must_exclude:
+        regex: '^Skip:\s.*'
+        regex_flag: mi
+        message: Forbidden 'Skip' field in PR's description
+
+.pr-description-validation-check: &pr-description-validation-check
+  when: pull_request.edited, pull_request.opened, pull_request.ready_for_review, pull_request.reopened, pull_request.synchronize, pull_request.unlabeled, pull_request_review.edited, pull_request_review.submitted
+  name: "PR: description validation"
+  validate:
+    # we can validate PR's description with multiple validators:
+    - *pr-description-field-validator-issue
+    - *pr-description-field-validator-bitbake
+    - *pr-description-field-validator-skip
+  pass:
+    - *check-success-action
+  fail:
+    - *check-failure-action
+  error:
+    - *check-error-action
+
+# PR: title validation rule
+#
+# Check if title follows the "<component>: <short description>" syntax
+#
+# Needed when:
+# * always
+#
+.pr-title-validator-component-description: &pr-title-validator-component-description
+  do: title
+  or:
+    - begins_with:
+        match:
+          - 'Revert'
+          - 'revert'
+          - 'Merge'
+          - 'merge'
+          - 'Bumped Submodules'
+          - 'Bumped submodules'
+          - 'bumped submodules'
+        message: >-
+          Title field in PR does not start with Revert, Merge, Bumped Submodules.
+    # search for "<component>: <short description>" regex using "^\S+: .+$"
+    - must_include:
+        regex: '^\S+: .+$'
+        message: >-
+          Title field in PR is incorrect.
+          Check
+          [documentation](https://cc-github.bmwgroup.net/pages/node0/node0-linux-documentation/master/contributing-information/pr-commit-conventions.html)
+          for details.
+.pr-title-validation-check: &pr-title-validation-check
+  when: pull_request.edited, pull_request.opened, pull_request.ready_for_review, pull_request.reopened, pull_request.synchronize, pull_request.unlabeled, pull_request_review.edited, pull_request_review.submitted
+  name: "PR: title validation"
+  validate:
+    - *pr-title-validator-component-description
+  pass:
+    - *check-success-action
+  fail:
+    - *check-failure-action
+  error:
+    - *check-error-action
+
+# PR: WIP validation rule
+#
+# Check if any of the "Work in Progress" indicating words is present in the PR
+# title. Positive search result will fail the check and prevent PR from running
+# GATE pipeline.
+# WIP search patterns are defined in the shared definition named `wip-regex`
+#
+# Mergeable check which is replacing Github WIP plugin.
+# Mergeable rules give more flexibility compared to WIP plugin, e.g.
+# possibility to specify more search patterns or exclude branch name from validation
+.pr-title-validator-wip: &pr-title-validator-wip
+  do: title
+  must_exclude:
+    <<: *wip-regex
+    message: "PR title contains WIP-specific keyword, which means PR is still under development.\n
+      WIP-related keywords (case insensitive):\n * wip\n * work in progress\n
+       * do not merge\n * do not review\n * draft"
+
+.pr-wip-validation-check: &pr-wip-validation-check
+  when: pull_request.edited, pull_request.opened, pull_request.ready_for_review, pull_request.reopened, pull_request.synchronize, pull_request.unlabeled, pull_request_review.edited, pull_request_review.submitted
+  name: "PR: WIP validation"
+  validate:
+    # we can validate PR's description with multiple validators:
+    - *pr-title-validator-wip
+  pass:
+    - *check-success-action
+  fail:
+    - *check-failure-action
+  error:
+    - *check-error-action
+
+# Generic filters definitions
+################################################################################
+
+# Do not run associated rules on draft pull requests.
+.not-a-draft-filter: &not-a-draft-filter
+  do: payload
+  pull_request:
+    draft:
+      boolean:
+        match: false
+
+# Do not run associated rules on a pull request with `no-check` label
+.not-no-check-label-filter: &not-no-check-label-filter
+  do: payload
+  pull_request:
+    labels:
+      must_exclude:
+        regex: "no-check"
+        key: "name"
+
+# Do not run associated rules on a pull request with `wip` label
+.not-wip-label-filter: &not-wip-label-filter
+  do: payload
+  pull_request:
+    labels:
+      must_exclude:
+        regex: "wip"
+        key: "name"
+
+# Do not run associated rules on a pull request with `WIP` or `wip` in the title
+.not-wip-title-filter: &not-wip-title-filter
+  do: payload
+  pull_request:
+    title:
+      must_exclude:
+        <<: *wip-regex
+
+# This filter detects if the PullRequest elements (e.g. title or
+# description) were changed. This is done by checking if special
+# payload key 'action' has value 'edited'
+.payload-edited-filter: &payload-edited-filter
+  do: payload
+  action:
+    must_include:
+      regex: "^edited$"
+
+# Generic triggers definitions
+################################################################################
+
+# PR: Trigger PRlint on PR description change
+#
+# Needed when:
+#  * This is a non voting rule
+#
+.pr-reinspect-trigger: &pr-reinspect-trigger
+  # This rule should be applied to every repository that is using
+  # node0-standard-linters template
+  when: pull_request.edited
+  name: "Trigger PRlint on PR description change"
+  # mergeable recipe needs to have at least one validation rule.
+  # No_empty is a the simplest and fastest check
+  # By setting it to FALSE, it will also succeed (and leave comment)
+  # when the PullRequest description is removed
+  validate:
+    - do: description
+      no_empty:
+        enabled: false
+  # Successful validation results in posting a 'reinspect-pr' comment
+  # into PR. This in turn is a trigger for zuul inspect-pr pipeline
+  # (part of node0-standard-linters template)
+  pass:
+    - do: comment
+      payload:
+        body: >
+          reinspect-pr
+# Change types
+################################################################################
+# Change type build-tools
+.changetype-build-tools-label: &changetype-build-tools-label "changetype-build-tools"
+
+.changetype-build-tools-label-must-include: &changetype-build-tools-label-must-include
+  must_include:
+    regex: *changetype-build-tools-label
+    message: "Label changetype-build-tools is found"
+
+.changetype-build-tools-label-must-exclude: &changetype-build-tools-label-must-exclude
+  must_exclude:
+    regex: *changetype-build-tools-label
+    message: "Label changetype-build-tools is not found"
+
+.changetype-build-tools-regex: &changetype-build-tools-regex "^((?!.*rse.*).*)$"
+
+.changetype-build-tools-must-include: &changetype-build-tools-must-include
+  must_include:
+    regex: *changetype-build-tools-regex
+    message: "Changeset contains build-tools changes"
+
+.changetype-build-tools-must-exclude: &changetype-build-tools-must-exclude
+  must_exclude:
+    regex: *changetype-build-tools-regex
+    message: "Changeset does not contain build-tools changes"
+
+# Change type mergeable-config
+.changetype-mergeable-config-label: &changetype-mergeable-config-label "changetype-mergeable-config"
+
+.changetype-mergeable-config-label-must-include: &changetype-mergeable-config-label-must-include
+  must_include:
+    regex: *changetype-mergeable-config-label
+    message: "Label changetype-mergeable-config is found"
+
+.changetype-mergeable-config-label-must-exclude: &changetype-mergeable-config-label-must-exclude
+  must_exclude:
+    regex: *changetype-mergeable-config-label
+    message: "Label changetype-mergeable-config is not found"
+
+.changetype-mergeable-config-regex: &changetype-mergeable-config-regex "^(\\.github/mergeable\\.yml|\\.github/mergeable-conf-generator\\.yaml)$"
+
+.changetype-mergeable-config-must-include: &changetype-mergeable-config-must-include
+  must_include:
+    regex: *changetype-mergeable-config-regex
+    message: "Changeset contains mergeable-config changes"
+
+.changetype-mergeable-config-must-exclude: &changetype-mergeable-config-must-exclude
+  must_exclude:
+    regex: *changetype-mergeable-config-regex
+    message: "Changeset does not contain mergeable-config changes"
+
+# Change type zuul-config
+.changetype-zuul-config-label: &changetype-zuul-config-label "changetype-zuul-config"
+
+.changetype-zuul-config-label-must-include: &changetype-zuul-config-label-must-include
+  must_include:
+    regex: *changetype-zuul-config-label
+    message: "Label changetype-zuul-config is found"
+
+.changetype-zuul-config-label-must-exclude: &changetype-zuul-config-label-must-exclude
+  must_exclude:
+    regex: *changetype-zuul-config-label
+    message: "Label changetype-zuul-config is not found"
+
+.changetype-zuul-config-regex: &changetype-zuul-config-regex "^(.*zuul-extra\\.d/.*\\.yaml|playbooks/.*|roles/.*|zuul\\.yaml|zuul\\.d/.*)$"
+
+.changetype-zuul-config-must-include: &changetype-zuul-config-must-include
+  must_include:
+    regex: *changetype-zuul-config-regex
+    message: "Changeset contains zuul-config changes"
+
+.changetype-zuul-config-must-exclude: &changetype-zuul-config-must-exclude
+  must_exclude:
+    regex: *changetype-zuul-config-regex
+    message: "Changeset does not contain zuul-config changes"
+
+# CCB Approvals
+################################################################################
+# CCB: Release Managers approval
+#
+.teams-release-managers: &teams-release-managers
+  - node0/members-internal-integration
+  - node0/members-external-globallogic-integration
+
+.ccb-release-managers-team-approval: &ccb-release-managers-team-approval
+  do: approvals
+  min:
+    count: 1
+    message: "At least one approval from release-managers is needed"
+  limit:
+    teams: *teams-release-managers
+
+.ccb-release-managers-check: &ccb-release-managers-check
+  when: pull_request.edited, pull_request.labeled, pull_request.opened, pull_request.ready_for_review, pull_request.reopened, pull_request.synchronize, pull_request.unlabeled, pull_request_review.*
+  name: "CCB: Release Managers approval"
+  validate:
+    - *ccb-release-managers-team-approval
+  pass:
+    - *check-success-action
+  fail:
+    - *check-failure-action
+  error:
+    - *check-error-action
+
+# CCB: An approval that is not on RSE changes
+#
+.teams-not-rse: &teams-not-rse
+  - node0/members-external-globallogic-integration
+
+.ccb-not-rse-team-approval: &ccb-not-rse-team-approval
+  do: approvals
+  min:
+    count: 1
+    message: "At least one approval from not-rse is needed"
+  limit:
+    teams: *teams-not-rse
+
+.teams-request-review-not-rse: &teams-request-review-not-rse
+  - members-external-globallogic-integration
+
+.ccb-not-rse-request-review-action: &ccb-not-rse-request-review-action
+  do: request_review
+  teams: *teams-request-review-not-rse
+
+.review-needed-not-rse-label: &review-needed-not-rse-label "review-needed-not-rse"
+
+.review-needed-not-rse-label-must-include:
+  &review-needed-not-rse-label-must-include
+  must_include:
+    regex: *review-needed-not-rse-label
+    message: "Label review-needed-not-rse is found"
+
+.review-needed-not-rse-label-must-exclude:
+  &review-needed-not-rse-label-must-exclude
+  must_exclude:
+    regex: *review-needed-not-rse-label
+    message: "Label review-needed-not-rse is not found"
+
+.ccb-not-rse-approval-needed: &ccb-not-rse-approval-needed
+  do: or
+  validate:
+    - do: changeset
+      or:
+        - *changetype-build-tools-must-include
+    - do: label
+      or:
+        - *changetype-build-tools-label-must-include
+        - *review-needed-not-rse-label-must-include
+    - do: and
+      validate:
+        - do: changeset
+          and:
+            - *changetype-mergeable-config-must-exclude
+            - *changetype-zuul-config-must-exclude
+        - do: label
+          and:
+            - *changetype-mergeable-config-label-must-exclude
+            - *changetype-zuul-config-label-must-exclude
+
+.ccb-not-rse-approval-not-needed: &ccb-not-rse-approval-not-needed
+  do: and
+  validate:
+    - do: changeset
+      and:
+        - *changetype-build-tools-must-exclude
+    - do: label
+      and:
+        - *changetype-build-tools-label-must-exclude
+        - *review-needed-not-rse-label-must-exclude
+    - do: or
+      validate:
+        - do: changeset
+          or:
+            - *changetype-mergeable-config-must-include
+            - *changetype-zuul-config-must-include
+        - do: label
+          or:
+            - *changetype-mergeable-config-label-must-include
+            - *changetype-zuul-config-label-must-include
+
+.ccb-not-rse-check: &ccb-not-rse-check
+  when: pull_request.edited, pull_request.labeled, pull_request.opened, pull_request.ready_for_review, pull_request.reopened, pull_request.synchronize, pull_request.unlabeled, pull_request_review.*
+  name: "CCB: An approval that is not on RSE changes"
+  validate:
+    - do: or
+      validate:
+        - *ccb-not-rse-approval-not-needed
+        - do: and
+          validate:
+            - *ccb-not-rse-approval-needed
+            - *ccb-not-rse-team-approval
+  pass:
+    - *check-success-action
+  fail:
+    - *ccb-not-rse-request-review-action
+    - *check-failure-action
+  error:
+    - *check-error-action
+
+# CCB: System Integrators CI approval
+#
+.teams-system-integrators-ci: &teams-system-integrators-ci
+  - node0/members-internal-integration
+  - node0/members-external-globallogic-integration
+
+.ccb-system-integrators-ci-team-approval: &ccb-system-integrators-ci-team-approval
+  do: approvals
+  min:
+    count: 1
+    message: "At least one approval from system-integrators-ci is needed"
+  limit:
+    teams: *teams-system-integrators-ci
+
+.teams-request-review-system-integrators-ci: &teams-request-review-system-integrators-ci
+  - members-internal-integration
+  - members-external-globallogic-integration
+
+.ccb-system-integrators-ci-request-review-action: &ccb-system-integrators-ci-request-review-action
+  do: request_review
+  teams: *teams-request-review-system-integrators-ci
+
+.review-needed-system-integrators-ci-label: &review-needed-system-integrators-ci-label "review-needed-system-integrators-ci"
+
+.review-needed-system-integrators-ci-label-must-include:
+  &review-needed-system-integrators-ci-label-must-include
+  must_include:
+    regex: *review-needed-system-integrators-ci-label
+    message: "Label review-needed-system-integrators-ci is found"
+
+.review-needed-system-integrators-ci-label-must-exclude:
+  &review-needed-system-integrators-ci-label-must-exclude
+  must_exclude:
+    regex: *review-needed-system-integrators-ci-label
+    message: "Label review-needed-system-integrators-ci is not found"
+
+.ccb-system-integrators-ci-approval-needed: &ccb-system-integrators-ci-approval-needed
+  do: or
+  validate:
+    - do: changeset
+      or:
+        - *changetype-mergeable-config-must-include
+        - *changetype-zuul-config-must-include
+    - do: label
+      or:
+        - *changetype-mergeable-config-label-must-include
+        - *changetype-zuul-config-label-must-include
+        - *review-needed-system-integrators-ci-label-must-include
+    - do: and
+      validate:
+        - do: changeset
+          and:
+            - *changetype-build-tools-must-exclude
+        - do: label
+          and:
+            - *changetype-build-tools-label-must-exclude
+
+.ccb-system-integrators-ci-approval-not-needed: &ccb-system-integrators-ci-approval-not-needed
+  do: and
+  validate:
+    - do: changeset
+      and:
+        - *changetype-mergeable-config-must-exclude
+        - *changetype-zuul-config-must-exclude
+    - do: label
+      and:
+        - *changetype-mergeable-config-label-must-exclude
+        - *changetype-zuul-config-label-must-exclude
+        - *review-needed-system-integrators-ci-label-must-exclude
+    - do: or
+      validate:
+        - do: changeset
+          or:
+            - *changetype-build-tools-must-include
+        - do: label
+          or:
+            - *changetype-build-tools-label-must-include
+
+.ccb-system-integrators-ci-check: &ccb-system-integrators-ci-check
+  when: pull_request.edited, pull_request.labeled, pull_request.opened, pull_request.ready_for_review, pull_request.reopened, pull_request.synchronize, pull_request.unlabeled, pull_request_review.*
+  name: "CCB: System Integrators CI approval"
+  validate:
+    - do: or
+      validate:
+        - *ccb-system-integrators-ci-approval-not-needed
+        - do: and
+          validate:
+            - *ccb-system-integrators-ci-approval-needed
+            - *ccb-system-integrators-ci-team-approval
+  pass:
+    - *check-success-action
+  fail:
+    - *ccb-system-integrators-ci-request-review-action
+    - *check-failure-action
+  error:
+    - *check-error-action
+
+# Repositories definitions
+# Combines a repository filter with generic rules definition
+# so they can then be listed in the final config
+################################################################################
+
+# Repo: mergeable-test
+.mergeable-test-filter: &mergeable-test-filter
+  do: repository
+  name:
+    must_include:
+      regex: "^mergeable-test$"
+
+.mergeable-test-pr-title-validation-check: &mergeable-test-pr-title-validation-check
+  <<: *pr-title-validation-check
+  filter:
+    - *mergeable-test-filter
+
+.mergeable-test-pr-description-validation-check: &mergeable-test-pr-description-validation-check
+  <<: *pr-description-validation-check
+  filter:
+    - *mergeable-test-filter
+
+.mergeable-test-pr-wip-validation-check: &mergeable-test-pr-wip-validation-check
+  <<: *pr-wip-validation-check
+  filter:
+    - *not-a-draft-filter
+    - *not-wip-label-filter
+    - *not-wip-title-filter
+    - *mergeable-test-filter
+
+.mergeable-test-commit-message-validation-check: &mergeable-test-commit-message-validation-check
+  <<: *commit-message-validation-check
+  filter:
+    - *mergeable-test-filter
+
+.mergeable-test-ccb-release-managers-check: &mergeable-test-ccb-release-managers-check
+  <<: *ccb-release-managers-check
+  filter:
+    - *not-a-draft-filter
+    - *not-wip-label-filter
+    - *not-wip-title-filter
+    - *mergeable-test-filter
+
+.mergeable-test-ccb-system-integrators-ci-check: &mergeable-test-ccb-system-integrators-ci-check
+  <<: *ccb-system-integrators-ci-check
+  filter:
+    - *not-a-draft-filter
+    - *not-wip-label-filter
+    - *not-wip-title-filter
+    - *mergeable-test-filter
+
+.mergeable-test-ccb-not-rse-check: &mergeable-test-ccb-not-rse-check
+  <<: *ccb-not-rse-check
+  filter:
+    - *not-a-draft-filter
+    - *not-wip-label-filter
+    - *not-wip-title-filter
+    - *mergeable-test-filter
+
+.mergeable-test-pr-reinspect-trigger: &mergeable-test-pr-reinspect-trigger
+  <<: *pr-reinspect-trigger
+  filter:
+    - *payload-edited-filter
+    - *mergeable-test-filter
+
+################################################################################
+# Mergeable configuration
+################################################################################
+version: 2
+mergeable:
+  - *mergeable-test-pr-title-validation-check
+  - *mergeable-test-pr-description-validation-check
+  - *mergeable-test-pr-wip-validation-check
+  - *mergeable-test-commit-message-validation-check
+  - *mergeable-test-ccb-release-managers-check
+  - *mergeable-test-ccb-system-integrators-ci-check
+  - *mergeable-test-ccb-not-rse-check
+  - *mergeable-test-pr-reinspect-trigger
