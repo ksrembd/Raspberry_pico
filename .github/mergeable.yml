@@ -12,7 +12,7 @@
         message: Remove "do not merge" label from the PR to merge
 
 .pr-checklist-path: &pr-checklist-path
-  - when: pull_request.*
+ # - when: pull_request.*
     name: 'PR test case path check'
     validate:
       - do: or
