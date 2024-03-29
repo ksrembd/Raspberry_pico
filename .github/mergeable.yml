@@ -32,5 +32,4 @@
 version: 2
 mergeable:
 #- *pr-checklist-validation-check
-- *pr-checklist-path
-    
+  - *pr-checklist-path
