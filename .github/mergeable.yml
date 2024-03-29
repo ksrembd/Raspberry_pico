@@ -33,7 +33,8 @@
   when: pull_request.*
   name: "PR: checklist validation"
   validate:
-        - *pr-checklist-validator-label  
+#        - *pr-checklist-validator-label 
+         - *pr-checklist-path
 
 version: 2
 mergeable:
