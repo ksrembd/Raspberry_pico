@@ -29,14 +29,6 @@
                 must_include:
                   regex:'ipnext/qnx/*'
 
-.pr-checklist-validation-check: &pr-checklist-validation-check
-  when: pull_request.*
-  name: "PR: checklist validation"
-  validate:
-      - *pr-checklist-path
-#     - *pr-checklist-validator-label 
-
-
 version: 2
 mergeable:
 #- *pr-checklist-validation-check
