@@ -13,15 +13,11 @@
 
 
 
-.mergeable-test-pr-title-validation-check: &mergeable-test-pr-title-validation-check
-  <<: *pr-title-validation-check
-  filter:
-    - *mergeable-test-filter
-
 ################################################################################
 # Mergeable configuration
 ################################################################################
 version: 2
 mergeable:
   - *pr-checklist-validator-label
-#  - *mergeable-test-pr-title-validation-check
+
+
