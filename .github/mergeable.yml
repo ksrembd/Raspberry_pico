@@ -4,7 +4,7 @@ mergeable:
     validate:
       - do: changeset
         must_include:
-          regex: 'ipnext/arch/*'
+          regex: 'ipnext/aas/*'
           message: 'new test case added'
     pass:
       - do: merge
