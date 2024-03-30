@@ -18,6 +18,7 @@
 
 # Repo: mergeable-test
 .mergeable-test-filter: &mergeable-test-filter
+validate:
   do: changeset
   name:
     must_include:
