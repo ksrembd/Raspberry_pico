@@ -6,7 +6,7 @@ mergeable:
   - when: pull_request.*, pull_request_review.*
     name: 'PR path check'
     validate:
-      - do: or
+      - do: and
         validate:
           - do: changeset
             must_include:
