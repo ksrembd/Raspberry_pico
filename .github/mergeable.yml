@@ -11,8 +11,7 @@ mergeable:
           - do: changeset
             must_include:
               regex: 'ipnext/arch/*'
-    pass:
-      message: "test cases modified in arch"
+
 
 
 
