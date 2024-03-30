@@ -7,7 +7,5 @@ mergeable:
           regex: 'ipnext/aas/*'
           message: 'new test case added'
     pass:
-      - do: merge
-        merge_method: 'squash'
-      - do: checks
-        status: 'success'
+      - do: comment
+        payload: check PASSED
