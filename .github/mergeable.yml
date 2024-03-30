@@ -1,16 +1,3 @@
-.pr-checklist-validator-label: &pr-checklist-validator-label
-    do: label
-    and:
-    - must_exclude:
-        regex: 'wip'
-        regex_flag: m
-        message: Remove "wip" label from the PR to merge
-    - must_exclude:
-        regex: 'do not merge'
-        regex_flag: m
-        message: Remove "do not merge" label from the PR to merge
-
-
 ################################################################################
 # Mergeable configuration
 ################################################################################
@@ -30,7 +17,16 @@ mergeable:
                 must_include:
                   regex: 'ipnext/aas/*'
     pass:
-      - *pr-checklist-validator-label
+    - do: label
+      and:
+      - must_exclude:
+          regex: 'wip'
+          regex_flag: m
+          message: Remove "wip" label from the PR to merge
+      - must_exclude:
+          regex: 'do not merge'
+          regex_flag: m
+          message: Remove "do not merge" label from the PR to merge
 
 
 
