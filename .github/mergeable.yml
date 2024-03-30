@@ -10,22 +10,6 @@
         regex_flag: m
         message: Remove "do not merge" label from the PR to merge
 
-.pr-title-validation-check: &pr-title-validation-check
-  when: pull_request.*
-  name: "PR: title validation"
-  validate:
-    - do: changeset
-      name:
-        must_include:
-          regex: 'ipnext/arch/*'
-    - do: and
-      validate:
-        - *pr-checklist-validator-label
-
-
-.mergeable-test-pr-title-validation-check: &mergeable-test-pr-title-validation-check
-  <<: *pr-title-validation-check
-  
 
 ################################################################################
 # Mergeable configuration
@@ -45,6 +29,8 @@ mergeable:
               - do: changeset
                 must_include:
                   regex: 'ipnext/aas/*'
+    pass:
+      - *pr-checklist-validator-label
 
 
 
