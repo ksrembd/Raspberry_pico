@@ -14,10 +14,10 @@
   when: pull_request.*
   name: "PR: title validation"
   validate:
-    do: changeset
-    name:
-      must_include:
-        regex: 'ipnext/arch/*'
+    - do: changeset
+      name:
+        must_include:
+          regex: 'ipnext/arch/*'
   pass:
     - *pr-checklist-validator-label
 
