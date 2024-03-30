@@ -11,11 +11,7 @@ mergeable:
           - do: changeset
             must_include:
               regex: 'ipnext/arch/*'
-          - do: and
-            validate:
-              - do: changeset
-                must_include:
-                  regex: 'ipnext/aas/*'
+
     pass:
       name: 'wip check'
       validate:
