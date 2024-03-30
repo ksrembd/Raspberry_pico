@@ -9,7 +9,7 @@ mergeable:
       - do: or
         validate:
           - do: changeset
-            must_exclude:
+            must_include:
               regex: 'ipnext/aas/*'
           - do: changeset
             must_include:
