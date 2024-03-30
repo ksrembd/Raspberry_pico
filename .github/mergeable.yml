@@ -8,7 +8,7 @@ mergeable:
     validate:
       - do: changeset
         must_include:
-        regex: 'ipnext/arch/*'
+        regex: 'ipnext/aas/*'
 
 
 
