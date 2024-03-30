@@ -14,20 +14,16 @@
   when: pull_request.*
   name: "PR: title validation"
   validate:
-  - *pr-checklist-validator-label
+    do: changeset
+    name:
+      must_include:
+        regex: 'ipnext/arch/*'
+  pass:
+    - *pr-checklist-validator-label
 
-# Repo: mergeable-test
-.mergeable-test-filter: &mergeable-test-filter
-validate:
-  do: changeset
-  name:
-    must_include:
-      regex: 'ipnext/arch/*'
 
 .mergeable-test-pr-title-validation-check: &mergeable-test-pr-title-validation-check
   <<: *pr-title-validation-check
-  filter:
-    - *mergeable-test-filter
 
 ################################################################################
 # Mergeable configuration
