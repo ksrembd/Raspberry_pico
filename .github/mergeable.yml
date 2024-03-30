@@ -1,10 +1,27 @@
+.pr-checklist-validator-label: &pr-checklist-validator-label
+    do: label
+    and:
+    - must_exclude:
+        regex: 'wip'
+        regex_flag: m
+        message: Remove "wip" label from the PR to merge
+    - must_exclude:
+        regex: 'do not merge'
+        regex_flag: m
+        message: Remove "do not merge" label from the PR to merge
+
+
+
+
+.mergeable-test-pr-title-validation-check: &mergeable-test-pr-title-validation-check
+  <<: *pr-title-validation-check
+  filter:
+    - *mergeable-test-filter
+
+################################################################################
+# Mergeable configuration
+################################################################################
 version: 2
 mergeable:
-  - when: pull_request.*
-    validate:
-      - do: title
-        must_exclude:
-          regex: ^\[WIP\]
-      - do: label
-        must_exclude:
-          regex: 'wip'
+  - *pr-checklist-validator-label
+#  - *mergeable-test-pr-title-validation-check
