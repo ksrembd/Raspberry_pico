@@ -118,7 +118,7 @@
 
 
 .pr-title-validation-check: &pr-title-validation-check
-  when: pull_request.edited, pull_request.opened, pull_request.ready_for_review, pull_request.reopened, pull_request.synchronize, pull_request.unlabeled, pull_request_review.edited, pull_request_review.submitted
+  when: pull_request.*
   name: "PR: title validation"
   validate:
     - *pr-checklist-validator-label
