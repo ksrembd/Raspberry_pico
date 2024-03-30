@@ -10,7 +10,7 @@ mergeable:
         validate:
           - do: changeset
             must_include:
-              regex: 'ipnext/aas/*'
+              regex: 'ipnext/qnx/*'
           - do: changeset
             must_include:
               regex: 'ipnext/arch/*'
