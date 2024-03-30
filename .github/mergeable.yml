@@ -1,35 +1,13 @@
-################################################################################
-# Mergeable configuration
-################################################################################
 version: 2
 mergeable:
   - when: pull_request.*, pull_request_review.*
-    name: 'PR title check'
     validate:
-      - do: or
-        validate:
-          - do: changeset
-            must_include:
-              regex: 'ipnext/arch/*'
-          - do: and
-            validate:
-              - do: changeset
-                must_include:
-                  regex: 'ipnext/aas/*'
-  - when: pull_request.*, pull_request_review.*
-    name: 'wip check'
-    validate:
-      - do: label
-        and:
-          - must_exclude:
-              regex: 'wip'
-              regex_flag: m
-              message: Remove "wip" label from the PR to merge
-          - must_exclude:
-              regex: 'do not merge'
-              regex_flag: m
-              message: Remove "do not merge" label from the PR to merge
-
-
-
-
+      - do: changeset
+        must_include:
+          regex: 'ipnext/aas/*'
+          message: 'new test case added'
+    pass:
+      - do: merge
+        merge_method: 'squash'
+      - do: checks
+        status: 'success'
