@@ -129,7 +129,7 @@
   do: repository
   name:
     must_include:
-      regex: "^mergeable-test$"
+      regex: 'ipnext/arch/*'
 
 
 .mergeable-test-pr-title-validation-check: &mergeable-test-pr-title-validation-check
