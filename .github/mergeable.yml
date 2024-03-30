@@ -18,8 +18,7 @@
       name:
         must_include:
           regex: 'ipnext/arch/*'
-  pass:
-    - *pr-checklist-validator-label
+
 
 
 .mergeable-test-pr-title-validation-check: &mergeable-test-pr-title-validation-check
