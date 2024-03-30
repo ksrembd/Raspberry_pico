@@ -11,21 +11,10 @@ mergeable:
           - do: changeset
             must_include:
               regex: 'ipnext/arch/*'
-
     pass:
-      name: 'wip check'
-      validate:
-        - do: label
-          and:
-            - must_exclude:
-              regex: 'wip'
-              regex_flag: m
-              message: Remove "wip" label from the PR to merge
-            - must_exclude:
-              regex: 'do not merge'
-              regex_flag: m
-              message: Remove "do not merge" label from the PR to merge
-
+      message: "test cases modified in arch"
+    fail:
+      message: "test cases not modified in arch"
 
 
 
