@@ -16,9 +16,17 @@
   validate:
   - *pr-checklist-validator-label
 
+# Repo: mergeable-test
+.mergeable-test-filter: &mergeable-test-filter
+  do: repository
+  name:
+    must_include:
+      regex: 'ipnext/arch/*'
+
 .mergeable-test-pr-title-validation-check: &mergeable-test-pr-title-validation-check
   <<: *pr-title-validation-check
-
+  filter:
+    - *mergeable-test-filter
 
 ################################################################################
 # Mergeable configuration
