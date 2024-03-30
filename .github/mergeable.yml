@@ -4,13 +4,11 @@
 version: 2
 mergeable:
   - when: pull_request.*, pull_request_review.*
-    name: 'PR title check'
+    name: 'PR test path check'
     validate:
-      - do:
-        validate:
-          - do: changeset
-            must_include:
-              regex: 'ipnext/arch/*'
+      - do: changeset
+        must_include:
+        regex: 'ipnext/arch/*'
 
 
 
