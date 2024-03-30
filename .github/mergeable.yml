@@ -13,8 +13,6 @@ mergeable:
               regex: 'ipnext/arch/*'
     pass:
       message: "test cases modified in arch"
-    fail:
-      message: "test cases not modified in arch"
 
 
 
