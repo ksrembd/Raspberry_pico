@@ -18,11 +18,14 @@
       name:
         must_include:
           regex: 'ipnext/arch/*'
-
+    - do: and
+      validate:
+      - *pr-checklist-validator-label
 
 
 .mergeable-test-pr-title-validation-check: &mergeable-test-pr-title-validation-check
   <<: *pr-title-validation-check
+  
 
 ################################################################################
 # Mergeable configuration
