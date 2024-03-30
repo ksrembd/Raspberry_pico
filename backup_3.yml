@@ -86,10 +86,9 @@
 
 
 .mergeable-test-pr-description-validation-check: &mergeable-test-pr-description-validation-check
-  filter:
+   <<: *pr-checklist-validation-check
+   filter:
     - *pr-checklist-path
-#   <<: *pr-checklist-validation-check
-
 
 ################################################################################
 # Mergeable configuration

@@ -1,0 +1,63 @@
+# Repo: mergeable-test
+.mergeable-test-filter: &mergeable-test-filter
+  do: repository
+  name:
+    must_include:
+      regex: "^mergeable-test$"
+
+.pr-title-validation-check: &pr-title-validation-check
+  when: pull_request.edited, pull_request.opened, pull_request.ready_for_review, pull_request.reopened, pull_request.synchronize, pull_request.unlabeled, pull_request_review.edited, pull_request_review.submitted
+  name: "PR: title validation"
+  validate:
+    - *pr-title-validator-component-description
+  pass:
+
+  fail:
+
+  error:
+
+
+
+.mergeable-test-pr-title-validation-check: &mergeable-test-pr-title-validation-check
+  <<: *pr-title-validation-check
+  filter:
+    - *mergeable-test-filter
+
+
+
+
+.pr-checklist-validator-label: &pr-checklist-validator-label
+    do: label
+    and:
+    - must_exclude:
+        regex: 'wip'
+        regex_flag: m
+        message: Remove "wip" label from the PR to merge
+    - must_exclude:
+        regex: 'do not merge'
+        regex_flag: m
+        message: Remove "do not merge" label from the PR to merge
+
+.pr-checklist-path: &pr-checklist-path
+  - when: pull_request.*
+    name: 'PR test case path check'
+    validate:
+      - do: or
+        validate:
+          - do: changeset
+            must_exclude:
+              regex:'ipnext/aas/*'
+          - do: and
+            validate:
+              - do: changeset
+                must_include:
+                  regex:'ipnext/arch/*'
+              - do: changeset
+                must_include:
+                  regex:'ipnext/qnx/*'
+
+version: 2
+mergeable:
+#- *pr-checklist-validation-check
+# - *pr-checklist-path
+  - *mergeable-test-pr-title-validation-check
