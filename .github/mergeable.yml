@@ -10,7 +10,14 @@
         regex_flag: m
         message: Remove "do not merge" label from the PR to merge
 
+.pr-title-validation-check: &pr-title-validation-check
+  when: pull_request.*
+  name: "PR: title validation"
+  validate:
+  - *pr-checklist-validator-label
 
+.mergeable-test-pr-title-validation-check: &mergeable-test-pr-title-validation-check
+  <<: *pr-title-validation-check
 
 
 ################################################################################
@@ -18,6 +25,7 @@
 ################################################################################
 version: 2
 mergeable:
-  - *pr-checklist-validator-label
+  - *mergeable-test-pr-title-validation-check
+
 
 
