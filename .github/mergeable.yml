@@ -123,12 +123,12 @@
   validate:
     - *pr-checklist-validator-label
 #    - *pr-title-validator-component-description
-  pass:
-    - *check-success-action
-  fail:
-    - *check-failure-action
-  error:
-    - *check-error-action
+#  pass:
+#    - *check-success-action
+#  fail:
+#    - *check-failure-action
+#  error:
+#    - *check-error-action
 
 # Repositories definitions
 # Combines a repository filter with generic rules definition
