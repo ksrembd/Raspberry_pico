@@ -18,7 +18,7 @@
 
 # Repo: mergeable-test
 .mergeable-test-filter: &mergeable-test-filter
-  do: repository
+  do: changeset
   name:
     must_include:
       regex: 'ipnext/arch/*'
