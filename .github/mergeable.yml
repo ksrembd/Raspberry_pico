@@ -7,8 +7,9 @@ mergeable:
     name: 'PR test path check'
     validate:
       - do: changeset
-        must_include:
-        regex: 'ipnext/aas/*'
+        name:
+          must_include:
+          regex: 'ipnext/aas/*'
 
 
 
