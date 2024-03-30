@@ -16,17 +16,19 @@ mergeable:
               - do: changeset
                 must_include:
                   regex: 'ipnext/aas/*'
-    pass:
-    - do: label
-      and:
-      - must_exclude:
-          regex: 'wip'
-          regex_flag: m
-          message: Remove "wip" label from the PR to merge
-      - must_exclude:
-          regex: 'do not merge'
-          regex_flag: m
-          message: Remove "do not merge" label from the PR to merge
+  - when: pull_request.*, pull_request_review.*
+    name: 'wip check'
+    validate:
+      - do: label
+        and:
+          - must_exclude:
+            regex: 'wip'
+            regex_flag: m
+            message: Remove "wip" label from the PR to merge
+          - must_exclude:
+            regex: 'do not merge'
+            regex_flag: m
+            message: Remove "do not merge" label from the PR to merge
 
 
 
