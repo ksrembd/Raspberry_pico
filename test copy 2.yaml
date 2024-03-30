@@ -1,0 +1,35 @@
+.pr-checklist-validator-label: &pr-checklist-validator-label
+    do: label
+    and:
+    - must_exclude:
+        regex: 'wip'
+        regex_flag: m
+        message: Remove "wip" label from the PR to merge
+    - must_exclude:
+        regex: 'do not merge'
+        regex_flag: m
+        message: Remove "do not merge" label from the PR to merge
+
+.pr-title-validation-check: &pr-title-validation-check
+  when: pull_request.*
+  name: "PR: title validation"
+  validate:
+    - do: changeset
+      name:
+        must_include:
+          regex: 'ipnext/arch/*'
+    - do: and
+      validate:
+        - *pr-checklist-validator-label
+
+
+.mergeable-test-pr-title-validation-check: &mergeable-test-pr-title-validation-check
+  <<: *pr-title-validation-check
+  
+
+################################################################################
+# Mergeable configuration
+################################################################################
+version: 2
+mergeable:
+  - *mergeable-test-pr-title-validation-check

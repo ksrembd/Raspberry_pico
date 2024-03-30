@@ -1,0 +1,26 @@
+# This validation must not be used with WIP, not-a-draft filters,
+# as each push must go through validation.
+.commit-message-validation-check: &commit-message-validation-check
+  when: pull_request.opened, pull_request.reopened, pull_request.synchronize, pull_request.edited, pull_request.labeled
+  name: "PR: commit message validation"
+  validate:
+    - *commit-issue-validator
+    - *commit-pr-fields-validator
+    - do: or
+      validate:
+        - *commit-excluder
+        - do: changeset
+          must_exclude:
+            regex: *changetype-yocto-test-layers-regex
+        - do: and
+          validate:
+            - do: changeset
+              must_include:
+                regex: *changetype-yocto-test-layers-regex
+            - *commit-component-description-validator
+  pass:
+    - *check-success-action
+  fail:
+    - *check-failure-action
+  error:
+    - *check-error-action

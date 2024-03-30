@@ -1,0 +1,26 @@
+################################################################################
+# Mergeable configuration
+################################################################################
+version: 2
+mergeable:
+  - when: pull_request.*, pull_request_review.*
+    name: 'PR title check'
+    validate:
+      - do: or
+        validate:
+          - do: changeset
+            must_exclude:
+              regex: 'ipnext/qnx/*'
+          - do: or
+            validate:
+              - do: changeset
+                must_include:
+                  regex: 'ipnext/arch/*'    
+              - do: changeset
+                must_include:
+                  regex: 'ipnext/aas/*'  
+    pass:
+      message: "test cases changed in test paths"
+    fail:
+      message: " test cases not changed in test paths"
+

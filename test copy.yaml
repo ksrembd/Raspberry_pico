@@ -1,0 +1,157 @@
+# Generic actions definitions
+################################################################################
+
+# Check action used to overwrites mergeable default messages in case of errors
+# additionally certain rules customize the pass action so other
+# actions should be customized too so there is always feedback to GitHub.
+.check-error-action: &check-error-action
+  do: checks
+  status: "action_required"
+  payload:
+    title: "Mergeable configuration errors!"
+    summary: |
+      ### Status: {{toUpperCase validationStatus}}
+            Some or All of the validators have returned 'error' status,
+            please check below for details
+            Here are some stats of the run: \n
+            {{validationCount}} validations were ran.
+            {{passCount}} PASSED
+            {{failCount}} FAILED
+            {{errorCount}} ERRORED
+    text: "{{#each validationSuites}}
+      #### {{{statusIcon status}}} Validator: {{toUpperCase name}}
+      Status {{toUpperCase status}}
+      {{#each validations }} * {{{statusIcon status}}}\
+      {{{ description }}}\n
+      {{#if details.error}}
+      Error : {{{details.error}}}
+      {{/if}}
+      {{/each}}
+      {{/each}}"
+
+# Check action used to overwrites mergeable default messages in case of failure
+# (validations did not passed e.g. approval not given)
+# additionally certain rules customize the pass action so other
+# actions should be customized too so there is always feedback to GitHub.
+.check-failure-action: &check-failure-action
+  do: checks
+  status: "failure"
+  payload:
+    title: "Approval needed"
+    summary: |
+      ### Status: {{toUpperCase validationStatus}}
+            Here are some stats of the run:
+            {{validationCount}} validations were ran.
+            {{passCount}} PASSED
+            {{failCount}} FAILED
+    text: "{{#each validationSuites}}\n
+      #### {{{statusIcon status}}} Validator: {{toUpperCase name}}\n
+      {{#each validations }} * {{{statusIcon status}}}\
+      {{{ description }}}\n
+      {{/each}}\n
+      {{/each}}"
+
+# Check action used to overwrites mergeable default messages in case of success
+# (validations passed e.g. approval given or not needed)
+# additionally certain rules customize the pass action so other
+# actions should be customized too so there is always feedback to GitHub.
+.check-success-action: &check-success-action
+  do: checks
+  status: "success"
+  payload:
+    title: "Approval given or not needed"
+    summary: |
+      ### Status: {{toUpperCase validationStatus}}
+            Here are some stats of the run:
+            {{validationCount}} validations were ran.
+            {{passCount}} PASSED
+            {{failCount}} FAILED
+    text: "{{#each validationSuites}}\n
+      #### {{{statusIcon status}}} Validator: {{toUpperCase name}}\n
+      {{#each validations }} * {{{statusIcon status}}}\
+      {{{ description }}}\n
+      {{/each}}\n
+      {{/each}}"
+
+
+.pr-checklist-validator-label: &pr-checklist-validator-label
+    do: label
+    and:
+    - must_exclude:
+        regex: 'wip'
+        regex_flag: m
+        message: Remove "wip" label from the PR to merge
+    - must_exclude:
+        regex: 'do not merge'
+        regex_flag: m
+        message: Remove "do not merge" label from the PR to merge
+# PR: title validation rule
+#
+# Check if title follows the "<component>: <short description>" syntax
+#
+# Needed when:
+# * always
+#
+.pr-title-validator-component-description: &pr-title-validator-component-description
+  do: title
+  or:
+    - begins_with:
+        match:
+          - 'Revert'
+          - 'revert'
+          - 'Merge'
+          - 'merge'
+          - 'Bumped Submodules'
+          - 'Bumped submodules'
+          - 'bumped submodules'
+        message: >-
+          Title field in PR does not start with Revert, Merge, Bumped Submodules.
+    # search for "<component>: <short description>" regex using "^\S+: .+$"
+    - must_include:
+        regex: '^\S+: .+$'
+        message: >-
+          Title field in PR is incorrect.
+          Check
+          [documentation](https://cc-github.bmwgroup.net/pages/node0/node0-linux-documentation/master/contributing-information/pr-commit-conventions.html)
+          for details.
+
+
+
+.pr-title-validation-check: &pr-title-validation-check
+  when: pull_request.*
+  name: "PR: title validation"
+  validate:
+    - *pr-checklist-validator-label
+#    - *pr-title-validator-component-description
+#  pass:
+#    - *check-success-action
+#  fail:
+#    - *check-failure-action
+#  error:
+#    - *check-error-action
+
+# Repositories definitions
+# Combines a repository filter with generic rules definition
+# so they can then be listed in the final config
+################################################################################
+
+# Repo: mergeable-test
+.mergeable-test-filter: &mergeable-test-filter
+  do: repository
+  name:
+    must_include:
+      regex: 'ipnext/arch/*'
+
+
+.mergeable-test-pr-title-validation-check: &mergeable-test-pr-title-validation-check
+  <<: *pr-title-validation-check
+  filter:
+    - *mergeable-test-filter
+
+
+################################################################################
+# Mergeable configuration
+################################################################################
+version: 2
+mergeable:
+  - *mergeable-test-pr-title-validation-check
