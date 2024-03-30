@@ -19,5 +19,8 @@ mergeable:
               - do: changeset
                 must_include:
                   regex: 'ipnext/aas/*'  
-
+    pass:
+      message: "test cases changed in test paths"
+    fail:
+      message: " test cases not changed in test paths"
 
