@@ -12,7 +12,7 @@ mergeable:
             match: true
             message: 'changes in test case path'
     pass:
-      - do: payload
+      - do: comment
         draft:
           boolean:
             match: true
