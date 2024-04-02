@@ -12,6 +12,8 @@ mergeable:
             match: true
             message: 'changes in test case path'
     pass:
-      - do: comment
-        payload:
-          body : changes idenfied in test case path
+      - do: payload
+        draft:
+          boolean:
+            match: true
+            message: changes idenfied in test case path
