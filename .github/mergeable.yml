@@ -1,19 +1,9 @@
 version: 2
 mergeable:
-  - when: pull_request.*, pull_request_review.*
+  - when: pull_request.*
     validate:
-      - do: changeset
-        must_include:
-          regex: 'ipnext/aas/*'
-          message: 'new test case added'
-      - do: payload
-        draft:
-          boolean:
-            match: true
-            message: 'changes in test case path'
-    pass:
-      - do: comment
-        draft:
-          boolean:
-            match: true
-            message: changes idenfied in test case path
+      - do: description
+        no_empty:
+          enabled: true
+          message: Description matter and should not be empty. Provide detail with **what** was changed, **why** it was changed, and **how** it was changed.
+

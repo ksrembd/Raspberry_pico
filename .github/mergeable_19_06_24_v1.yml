@@ -1,0 +1,35 @@
+
+#working code bot comments in description when the changes are done in the give path
+# syntax updated for the 2 folder paths
+version: 2
+mergeable:
+  - when: pull_request.*
+    name: 'PR title check'
+    validate:
+      - do: or
+        validate:
+          - do: changeset
+            must_include:
+              regex: ['ipnext/arch/','ipnext/aas/']
+              regex_flag: 'im'
+              all: false
+    pass:
+     - do: comment
+       payload:
+        body: this PR is ready to merge
+
+# working code to squash and merge the code only when the changes done in the given path
+version: 2
+mergeable:
+  - when: pull_request.*, pull_request_review.*
+    validate:
+      - do: changeset
+        must_include:
+          regex: 'ipnext/aas/*'
+          message: 'new test case added'
+    pass:
+      - do: merge
+        merge_method: 'squash'
+      - do: checks
+        status: 'success'
+        
