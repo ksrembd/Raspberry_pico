@@ -4,5 +4,13 @@ mergeable:
     validate:
       - do: description
         no_empty:
-          enabled: true
-          message: Description matter and should not be empty. Provide detail with **what** was changed, **why** it was changed, and **how** it was changed.
+          enabled: true # Cannot be empty when true.
+          message: 'Description cant be empty' # this is optional, a default message is used when not specified.
+        must_include:
+          regex: '### SW-HW Integration Testing Pull Request Review Checklist |### Changes'
+          regex_flag: 'i' # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
+          message: 'fill the checklist'
+    pass:
+     - do: comment
+       payload:
+        body: this PR is ready to merge
