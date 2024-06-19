@@ -1,16 +1,8 @@
 version: 2
 mergeable:
   - when: pull_request.*
-    name: 'PR title check'
     validate:
-      - do: or
-        validate:
-          - do: changeset
-            must_include:
-              regex: ['ipnext/arch/','ipnext/aas/']
-              regex_flag: 'im'
-              all: false
-    pass:
-     - do: comment
-       payload:
-        body: this PR is ready to merge
+      - do: description
+        no_empty:
+          enabled: true
+          message: Description matter and should not be empty. Provide detail with **what** was changed, **why** it was changed, and **how** it was changed.
