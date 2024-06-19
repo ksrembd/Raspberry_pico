@@ -7,13 +7,13 @@ mergeable:
          # enabled: true # Cannot be empty when true.
           #message: 'Description cant be empty' # this is optional, a default message is used when not specified.
         must_include:
-          regex: '### Checklist'
+          regex: '# SW-HW Integration Testing Pull Request Review Checklist'
           #regex_flag: 'i' # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
           message: 'fill the checklist'
     pass:
      - do: comment
        payload:
-        body: this PR is ready to merge 1
+        body: fill the checklist
     fail:
       - do: comment
         payload:
