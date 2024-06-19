@@ -96,7 +96,7 @@ mergeable:
               regex_flag: 'im'
               all: false
     pass:
-     - *mergeable-test-pr-description-validation-check
+#     - *mergeable-test-pr-description-validation-check
      - do: comment
        payload:
         body: this PR is ready to merge
