@@ -69,7 +69,7 @@
         regex_flag: m
         message: Remove "do not merge" label from the PR to merge
 .pr-checklist-validation-check: &pr-checklist-validation-check
-  when: pull_request.*
+#  when: pull_request.*
   name: "PR: checklist validation"
   validate:
 #    - *pr-checklist-validator-description
@@ -92,10 +92,12 @@ mergeable:
           - do: changeset
             must_include:
               regex: ['ipnext/arch/','ipnext/aas/']
+              message: 'test cases are changed in the definded folder'
               regex_flag: 'im'
               all: false
     pass:
+     - *mergeable-test-pr-description-validation-check
      - do: comment
        payload:
         body: this PR is ready to merge
-     - *mergeable-test-pr-description-validation-check
+     
