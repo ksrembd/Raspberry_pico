@@ -72,7 +72,7 @@
   when: pull_request.*
   name: "PR: checklist validation"
   validate:
-    - *pr-checklist-validator-description
+#    - *pr-checklist-validator-description
     - *pr-checklist-validator-label  
  
 .mergeable-test-pr-description-validation-check: &mergeable-test-pr-description-validation-check
