@@ -14,3 +14,7 @@ mergeable:
      - do: comment
        payload:
         body: this PR is ready to merge 1
+    fail:
+      - do: comment
+        payload:
+          body: 'Description cant be empty'
