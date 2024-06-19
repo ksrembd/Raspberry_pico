@@ -96,6 +96,7 @@ mergeable:
               regex_flag: 'im'
               all: false
     pass:
+     - *pr-checklist-validator-label 
 #     - *mergeable-test-pr-description-validation-check
      - do: comment
        payload:
