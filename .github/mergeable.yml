@@ -3,8 +3,8 @@ version: 2
 mergeable:
   - when: pull_request.*
     validate:
-      and:
-        - do: description
+      - do: description
+        and :
           - no_empty:
               enabled: true # Cannot be empty when true.
               message: 'Description cant be empty' # this is optional, a default message is used when not specified.
