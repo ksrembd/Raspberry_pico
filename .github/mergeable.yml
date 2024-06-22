@@ -13,11 +13,11 @@ mergeable:
             #regex_flag: 'i' # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
             message: 'fill the checklist'
     pass:
-     - do: comment
-       payload:
-        body: fill the checklist
-    fail:
       - do: comment
         payload:
-          body: 'Description cant be empty'
+          body: fill the checklist
+    fail:
+        - do: comment
+          payload:
+            body: 'Description cant be empty'
 
