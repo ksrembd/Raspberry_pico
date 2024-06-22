@@ -12,6 +12,12 @@ mergeable:
               regex: '# SW-HW Integration Testing Pull Request Review Checklist'
               #regex_flag: 'i' # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
               message: 'fill the checklist'
+          #Checking when both OK and NOK / NA checkboxes are selected
+          - must_exclude:
+              regex: '^\s+\-\s\[x\]\sOK\s*\:\s+\-\s\[x\]\sNOK\s*\/\s*NA\s*\:\s*[a-z A-Z \d \: \, \. \- \[\]]+$'
+              regex_flag: m
+              message: Selecting both "OK and NOK / OK" checkboxes are invalid, Select any one of the checkboxes in a particular checklist
+   
     pass:
       - do: comment
         payload:
