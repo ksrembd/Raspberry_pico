@@ -1,3 +1,4 @@
+# working code bot comments when the description is empty or the must_incluide regex # SW-HW Integration Testing Pull Request Review Checklist'
 version: 2
 mergeable:
   - when: pull_request.*
@@ -6,7 +7,7 @@ mergeable:
         no_empty:
           enabled: true # Cannot be empty when true.
           message: 'Description cant be empty' # this is optional, a default message is used when not specified.
-        begins_with:
+        must_include:
           regex: '# SW-HW Integration Testing Pull Request Review Checklist'
           #regex_flag: 'i' # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
           message: 'fill the checklist'
@@ -18,3 +19,4 @@ mergeable:
       - do: comment
         payload:
           body: 'Description cant be empty'
+
