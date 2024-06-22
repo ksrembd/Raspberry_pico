@@ -17,7 +17,37 @@ mergeable:
               regex: '^\s+\-\s\[x\]\sOK\s*\:\s+\-\s\[x\]\sNOK\s*\/\s*NA\s*\:\s*[a-z A-Z \d \: \, \. \- \[\]]+$'
               regex_flag: m
               message: Selecting both "OK and NOK / OK" checkboxes are invalid, Select any one of the checkboxes in a particular checklist
-   
+          #Checking when both OK and NOK checkboxes are selected
+          - must_exclude:
+              regex: '^\s+\-\s\[x\]\sOK\s*\:\s+\-\s\[x\]\s*NOK\s*\:\s*[a-z A-Z \d \: \, \. \- \[\]]+$'
+              regex_flag: m
+              message: Selecting both checkboxes for "OK and NOK" is invalid , Select any one of the checkboxes in a particular checklist
+          #Checking when both OK and NA checkboxes are selected
+          - must_exclude:
+              regex: '^\s+\-\s\[x\]\sOK\s*\:\s+\-\s\[x\]\s*NA\s*\:\s*[a-z A-Z \d \: \, \. \- \[\]]+$'
+              regex_flag: m
+              message: Selecting both checkboxes for "OK and NA" is invalid , Select any one of the checkboxes in a particular checklist
+          #Checking when NOK \ NA is selected
+          - must_exclude:
+              regex: '^\s+\-\s\[ \]\sOK\s*\:\s+\-\s\[x\]\s*NOK\s*\/\s*NA\s*\:\s\[enter text here\]'
+              regex_flag: m
+              message: When "NOK \ NA" is selected, make sure either NOK or NA is kept by editing with a description
+          #Checking when both OK and NOK / NA  checkboxes are empty
+          - must_exclude:
+              regex: '^\s+\-\s\[ \]\sOK\s*\:\s+\-\s\[ \]\s*NOK\s*\/\s*NA\s*\:\s*[a-z A-Z \d \: \, \. \- \[\]]+$'
+              regex_flag: m
+              message: Both "OK and NOK / OK" checkboxes should not be empty, Select any one of the checkboxes
+          #Checking When both OK and NOK checkboxes are empty
+          - must_exclude:
+              regex: '^\s+\-\s\[ \]\sOK\s*\:\s+\-\s\[ \]\s*NOK\s*\:\s*[a-z A-Z \d \: \, \. \- \[\]]+$'
+              regex_flag: m
+              message: Both "OK and NOK" checkboxes should not be empty, Select any one of the checkboxes
+          #Checking When both OK and NA checkboxes are empty
+          - must_exclude:
+              regex: '^\s+\-\s\[ \]\sOK\s*\:\s+\-\s\[ \]\s*NA\s*\:\s*[a-z A-Z \d \: \, \. \- \[\]]+$'
+              regex_flag: m
+              message: Both "OK and NA" checkboxes should not be empty, Select any one of the checkboxes
+
     pass:
       - do: comment
         payload:
